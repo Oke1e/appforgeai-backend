@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import logging
 
 app = FastAPI()
@@ -25,11 +26,15 @@ logging.basicConfig(level=logging.INFO)
 def read_root():
     return {"message": "Backend is running!"}
 
-@app.post("/api/chat")
-async def chat_endpoint(request: Request):
-    data = await request.json()
-    message = data.get("message", "")
-    category = data.get("category", "other")  # Default to "other" if no category is provided
+# ✅ Define the expected request body
+class ChatRequest(BaseModel):
+    message: str
+    category: str = "other"
+
+@app.post("/api/chat")  # ✅ Ensure this route properly handles POST requests
+async def chat_endpoint(request: ChatRequest):
+    message = request.message
+    category = request.category
 
     logging.info(f"Received message: {message} | Category: {category}")
 
