@@ -1,12 +1,12 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# Allow frontend requests from Vercel
+# CORS settings (allows frontend to connect)
 origins = [
-    "https://appforgeai-frontend.vercel.app",  # Frontend on Vercel
-    "http://localhost:3000"  # Local dev testing
+    "http://localhost:3000",  # Local frontend (for development)
+    "https://appforgeai-frontend.vercel.app"  # Deployed frontend on Vercel
 ]
 
 app.add_middleware(
@@ -17,6 +17,13 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
+# ✅ Root route (for basic status check)
 @app.get("/")
 def read_root():
     return {"message": "Backend is running!"}
+
+# ✅ API Route for Chatbot Communication
+@app.post("/api/chat")
+async def chat_endpoint(request: Request):
+    data = await request.json()
+    return {"reply": f"Received: {data['message']}"}
